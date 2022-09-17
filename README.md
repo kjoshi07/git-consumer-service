@@ -1,4 +1,4 @@
-#Git Consumer Service
+# Git Consumer Service
 
 Git Consumer Service is microservice which get user’s non-forked repository from github.com and display in custom defined schema for client applications.Service is using https://api.github.com to get user’s repository and filter only non-forked repository to return for client. Service is developed in reactive fremwork using Spring Boot WebFlux with Netty.
 
