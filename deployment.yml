@@ -1,0 +1,33 @@
+apiVersion: v1 # Kubernetes API version
+kind: Service
+metadata:
+  name: git-consumer-service
+spec:
+  selector:
+    app: git-consumer-service
+  ports:
+    - protocol: "TCP"
+      port: 8082
+      targetPort: 8082
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: git-consumer-service
+spec:
+  selector:
+    matchLabels:
+      app: git-consumer-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: git-consumer-service
+    spec:
+      containers:
+        - name: git-consumer-service
+          image: git-consumer-service:1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8082

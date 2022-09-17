@@ -1,0 +1,38 @@
+server:
+  port: 8081
+
+management:
+  endpoints:
+    web:
+      exposure:
+        includes: mappings
+  health:
+    show-details: always
+    circuitbreakers:
+      enabled: true
+
+resilience4j:
+  ratelimiter:
+    instances:
+      gitRepoService:
+        limitForPeriod: 3
+        limitRefreshPeriod: 60s
+        timeoutDuration: 1000ms
+
+
+
+api:
+  cache:
+    duration: 5
+  endpoint:
+    base: /ap1/v1
+    repo-path: ${api.endpoint.base}/git-repo
+  git-hub:
+    url: https://api.github.com
+    auth-token: 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
+    path:
+      repos: /users/{username}/repos
+      branches: /repos/{username}/{repoName}/branches
+
+
+

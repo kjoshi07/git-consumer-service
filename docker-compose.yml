@@ -1,0 +1,15 @@
+version: '2'
+services:
+  git-repo:
+    container_name: git-consumer-service
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: git-consumer-service:latest
+    ports:
+      - 8081:8081
+    networks:
+      - git-consumer-service-network
+networks:
+  git-consumer-service-network:
+    driver: bridge
