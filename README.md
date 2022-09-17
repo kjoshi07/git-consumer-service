@@ -1,6 +1,6 @@
 # Git Consumer Service
 
-Git Consumer Service is microservice which get user’s non-forked repository from github.com and display in custom defined schema for client applications.Service is using https://api.github.com to get user’s repository and filter only non-forked repository to return for client. Service is developed in reactive fremwork using Spring Boot WebFlux with Netty.
+Git Consumer Service is microservice which get user’s non-forked repository from GitHub.com and display in custom defined schema for client applications.Service is using https://api.github.com to get user’s repository and filter only non-forked repository to return for client. Service is developed in reactive framework using Spring Boot WebFlux with Netty.
 
 ## Build
 
@@ -25,28 +25,39 @@ Alternatively, you can build the JAR file with ```./mvnw clean package``` and th
 ```java -jar target/gs-rest-service-0.1.0.jar```
 
 ## Building from Dockerfile
-Dockerfile is present in projct's root folder from where you can build docker image and run on docker by running following commands:
+Dockerfile is present in project's root folder from where you can build docker image and run on docker by running following commands:
 
 ```bash
 docker build -t git-consumer-service:1.0 .
 docker run -p 8080:8080 ${imageId}
 ```
-Or DockerCompose is also present in projetc's root folder from where you can run git consumer service with following command in detach mode.
+Or DockerCompose is also present in project's root folder from where you can run git consumer service with following command in detach mode.
 
 ``` 
 docker-compose up -d
 - or -
 docker-compose up --detach
   ```
+
+## Run on Kubernetes Cluster
+
+Project root folder contains `````deployment.yml`````, run below command to deploy and run the container.
+* Create the Deployment by running the following command:
+```` 
+kubectl apply -f ./deployment.yml
+````
+* Run ````kubectl get deployments```` to check if the Deployment was created.
+* GET API should be able to access ````http://$HOST_NAME:8082/api/v1/git-repo/{username}````
+
 ## CI CD Pipeline
 
 ### prerequisites ###
-* Jenkin Up & Running  (A reference how to setup Jenkin on AWS EC2 https://www.jenkins.io/doc/tutorials/tutorial-for-installing-jenkins-on-AWS/
-* Docker is Installed on machine where Jenkin is Installed.
+* Jenkins Up & Running  (A reference how to set up Jenkins on AWS EC2 https://www.jenkins.io/doc/tutorials/tutorial-for-installing-jenkins-on-AWS/
+* Docker is Installed on machine where Jenkins is Installed.
 * JDK 17
 * Maven > 3.5.x
-* Configure AWS Role Access Key & Secret Key in Jenkin.
-* Pipeline Item is created in Jenkin with SCM polling with ```Jenkinsfile```.
+* Configure AWS Role Access Key & Secret Key in Jenkins.
+* Pipeline Item is created in Jenkins with SCM polling with ```Jenkinsfile```.
 * ```Jenkinsfile``` is present in project's root folder with Stages (Checkout SCM, Login to ECR, Build, Test, Build Image, Pushing to ECR, Deploy to ECS)
 * Before running the pipeline follow below steps:
                    
@@ -56,11 +67,6 @@ docker-compose up --detach
       4. Run the pipeline and you should able to see all of your staging are completed successfuly then check your service ir up and running by ELB URL.
 
   ![Jenkin Pipeline Status](assets/images/Jenkin_pipeline.png)
-
-
-## API Documentation
-
-http://$HOST_NAME:$PORT:/swagger-ui.html
 
 ## Technologies
 
@@ -74,10 +80,10 @@ http://$HOST_NAME:$PORT:/swagger-ui.html
 #### Spring Security ###
 * Service is using Basic authenication and a user is configured in SecurityConfig.java, in real world OAuth2, IAM, JWT, DB Auth or third partyModel Identify provider should be used.
 #### Spring Cloud Circuit Breaker ####
-* Spring Cloud Circuit breaker provides an abstraction across different circuit breaker implementations and service is using with Resilence4j.Currenctly service is using @RateLimiter to limit the API call 3 in one minute but in real time scenario should be alo using @Retry or @CircuitBreaker with fallback method where you can return the result from cache to make your service fault-tolerance. 
-#### Spring Cache with Caffene ####
-* Service is using Spring cache with Caffene impmentaion to reducing the number of executions based on the information available in the cache.
-* Currently service is using 5 min duration to keep cache.
+* Spring Cloud Circuit breaker provides an abstraction across different circuit breaker implementations and service is using with Resilience4j.Currently, service is using @RateLimiter to limit the API call 3 in one minute but in real time scenario should be alo using @Retry or @CircuitBreaker with fallback method where you can return the result from cache to make your service fault-tolerance. 
+#### Spring Cache with Caffeine ####
+* Service is using Spring cache with Caffeine implementation to reducing the number of executions based on the information available in the cache.
+* Currently, service is using 5 min duration to keep cache.
 * You can modify time by updating property ```api.cache.duration``` in ```application.yml``` under resources.
 
 #### OpenAPI 3.0 with Swagger UI ####
@@ -86,17 +92,17 @@ http://$HOST_NAME:$PORT:/swagger-ui.html
 
 #### Project Lombok ####
 * Lombok is a Java library tool that generates code for minimizing boilerplate code. The library replaces boilerplate code with easy-to-use annotations.
-* We are using Lombok annotaion to generate out Getter/Setter/Builder etc for almost all of our DTOs.
+* We are using Lombok annotation to generate out Getter/Setter/Builder etc for almost all of our DTOs.
 
 #### Logging with Log4j2 ####
 
 * Service is using Spring Boot Logging with Log4j2 for logging.
-* Logging settings can be modified by modifying logging definations from ```log4j2-spring.xml```
+* Logging settings can be modified by modifying logging definitions from ```log4j2-spring.xml```
 
 #### Global Exception Handler ####
 
 * GitConsumerService is handling custom exception by overriding reactive default exception handler.
-* Currently service is returning status and message if there is custom exception is thrown by service but you can modify the behavior by updating ```com.kc.gitconsumerservice.exceptions.ErrorAttributesKey```
+* Currently, service is returning status and message if there is custom exception is thrown by service but you can modify the behavior by updating ```com.kc.gitconsumerservice.exceptions.ErrorAttributesKey```
 * You can customize the behavior of response for custom exceptions by updating ```GlobalErrorAttributes.java & GlobalErrorWebExceptionHandler.java ``` under ```exceptions``` package.
 
 #### Code Coverage ####
@@ -116,7 +122,7 @@ By default if you do not pass ``page`` & ``size`` as Query Param then service se
 * ````Basic Auth: username=user, password=password````
 
 Response:
-````aidl
+````
  [{
         "name": "ButterKnifeDroid",
         "ownerLogin": "kjoshi07",
@@ -130,14 +136,14 @@ Response:
 
 ````
 
-* Get All Non=forked User repository with pagignation params (pass username as github valid username)
+* Get All Non=forked User repository with pagination params (pass username as github valid username), Please note in real world scenario should return total No of Records and Total pages as metadata so client application can create pagination but as git repo does not return total records count so currently API returns as array result.
 
 ```` http://localhost:8081/api/v1/git-repo/{validgithubuser}?page=1&size=10````
   
 ````Basic Auth: username=user, password=password````
 
 Response:
-````aidl
+````
  [{
         "name": "ButterKnifeDroid",
         "ownerLogin": "kjoshi07",
@@ -157,7 +163,7 @@ Response:
 ```` Basic Auth: username=user, password=password````
 
 Response:
-````aidl
+````
  {
     "message": "User is not found in github!",
     "status": 404
