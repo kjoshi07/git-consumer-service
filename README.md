@@ -62,14 +62,6 @@ docker-compose up --detach
 
 http://$HOST_NAME:$PORT:/swagger-ui.html
 
-## Real world vs. example
-
-* In real world API should limit requests (for example, to prevent DDoS attacks).
-* In real world in profiles should be defined.
-* In real world, depending on requirements, some circuit breaker solution may be necessary.
-* In real world, depending on requirements, pagination and sorting endpoint may be necessary.
-* In real world, depending on requirements, authorization may be necessary to increase available request pool.
-
 ## Technologies
 
 * Java 17
