@@ -15,10 +15,6 @@ java -jar target/*.jar
 
 ````
 
-```` 
-Running petclinic locally
-````
-
 ## Build
 
 ```./mvn spring-boot:build```
