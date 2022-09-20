@@ -143,7 +143,7 @@ public class GitHubConsumerControllerTest {
     }
 
     @Test
-    public void testGetAllUserRepos_TooManyRequest_Failed_429() throws Exception {
+    public void testGetAllUserRepos_TooManyRequest_Failed_403() throws Exception {
         Mockito.when(gitHubService.getNonForkedRepos(any())).thenThrow(new RateLimitException("rate limit is exceeded to github!"));
         webTestClient.get()
                 .uri(gitHubUserApiPath)
@@ -152,9 +152,9 @@ public class GitHubConsumerControllerTest {
                     headers.add(HttpHeaders.AUTHORIZATION, basicAuthHeader);
                 })
                 .exchange()
-                .expectStatus().isEqualTo(HttpStatus.TOO_MANY_REQUESTS)
+                .expectStatus().isEqualTo(HttpStatus.FORBIDDEN)
                 .expectBody()
-                .jsonPath("$.status").isEqualTo(HttpStatus.TOO_MANY_REQUESTS.value());
+                .jsonPath("$.status").isEqualTo(HttpStatus.FORBIDDEN.value());
     }
 
     @Test

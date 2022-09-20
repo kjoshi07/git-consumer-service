@@ -16,7 +16,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.Base64Utils;
 
-
 @TestPropertySource(locations = "/test.properties")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = GitConsumerServiceApplication.class)
 public class GitHubConsumerIntegrationTest {

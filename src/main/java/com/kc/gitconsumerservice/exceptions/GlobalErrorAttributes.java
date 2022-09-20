@@ -18,7 +18,7 @@ public class GlobalErrorAttributes extends DefaultErrorAttributes {
     private final List<ExceptionRule> exceptionsRules = List.of(
             new ExceptionRule(UserNotFoundException.class, HttpStatus.NOT_FOUND),
             new ExceptionRule(BadRequestException.class, HttpStatus.BAD_REQUEST),
-            new ExceptionRule(RateLimitException.class, HttpStatus.TOO_MANY_REQUESTS),
+            new ExceptionRule(RateLimitException.class, HttpStatus.FORBIDDEN),
             new ExceptionRule(RequestNotPermitted.class, HttpStatus.TOO_MANY_REQUESTS)
 
     );
