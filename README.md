@@ -2,6 +2,10 @@
 
 Git Consumer Service is microservice which get user’s non-forked repository from GitHub.com and display in custom defined schema for client applications.Service is using https://api.github.com to get user’s repository and filter only non-forked repository to return for client. Service is developed in reactive framework using Spring Boot WebFlux with Netty.
 
+## Note ##
+
+Please change GitHub developer token at ````resources/application.yml```` for property ````api.git-hub.auth-token```` otherwise GitHub api call will through ````401```` error.
+
 ## Run git-consumer-service Locally
 
 git-consumer-service is a Spring Boot application built using Maven. You can build a jar file and run it from the command line:
