@@ -3,6 +3,7 @@ package com.kc.gitconsumerservice;
 import com.kc.gitconsumerservice.consumer.dto.Repository;
 import com.kc.gitconsumerservice.consumer.services.GitHubService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -108,18 +109,4 @@ public class GitHubConsumerIntegrationTest {
                 .expectStatus().isEqualTo(HttpStatus.NOT_ACCEPTABLE);
     }
 
-
-    @Test
-    void testGetAllUserRepos_UserNotFound_Failed_404() {
-        webTestClient.get()
-                .uri(githubNonUserApiPath)
-                .headers(headers -> {
-                    headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
-                    headers.add(HttpHeaders.AUTHORIZATION, basicAuthHeader);
-                })
-                .exchange()
-                .expectStatus().isEqualTo(HttpStatus.NOT_FOUND)
-                .expectBody()
-                .jsonPath("$.status").isEqualTo(HttpStatus.NOT_FOUND.value());
-    }
 }

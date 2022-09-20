@@ -93,7 +93,7 @@ kubectl apply -f ./deployment.yml
 #### Spring Security ###
 * Service is using Basic authenication and a user is configured in SecurityConfig.java, in real world OAuth2, IAM, JWT, DB Auth or third partyModel Identify provider should be used.
 #### Spring Cloud Circuit Breaker ####
-* Spring Cloud Circuit breaker provides an abstraction across different circuit breaker implementations and service is using with Resilience4j.Currently, service is using @RateLimiter to limit the API call 3 in one minute but in real time scenario should be alo using @Retry or @CircuitBreaker with fallback method where you can return the result from cache to make your service fault-tolerance. 
+* Spring Cloud Circuit breaker provides an abstraction across different circuit breaker implementations and service is using with ````Resilience4j````.Currently, service is using ```@RateLimiter``` to limit the API call ````100 in 1000ms```` (you can increase by setting ````resilience4j.ratelimiter```` properties in ````application.yml````) but in real time scenario should be alo using ```@Retry``` or ```@CircuitBreaker``` with ````fallback method```` where you can return the result from cache to make your service fault-tolerance. 
 #### Spring Cache with Caffeine ####
 * Service is using Spring cache with Caffeine implementation to reducing the number of executions based on the information available in the cache.
 * Currently, service is using 5 min duration to keep cache.
@@ -126,9 +126,13 @@ kubectl apply -f ./deployment.yml
 
 * As GitConsumer service is using OpenAPI 3.0 with Swagger UI so you can see all api definition at below URL:
 
+| Name             | Method         | Params                                                            | Description                                       |
+|------------------|----------------|-------------------------------------------------------------------|---------------------------------------------------|
+| /api/v1/git-repo | GET            | Basic Auth (Username&Password), page(default 1), size(default 30) | Get user's all non-forked repository from GitHub. |
+
 ````http://$HOST_NAME:PORT/swagger-ui.html ````
 
-* Get All Non=forked User repository (If service is running locally, you can change hostname and port accordengly)
+* Get All Non-forked User repository (If service is running locally, you can change hostname and port accordingly)
 By default if you do not pass ``page`` & ``size`` as Query Param then service set by default page=1 and size=30
 ```` http://localhost:8081/api/v1/git-repo/{username}````
 

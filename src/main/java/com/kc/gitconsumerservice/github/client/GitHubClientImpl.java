@@ -28,6 +28,9 @@ import java.util.Locale;
 @Qualifier("gitHubService")
 public class GitHubClientImpl implements GitHubClient {
 
+    private final static String GITHUB_API_PER_PAGE = "per_page";
+    private static final String GITHUB_API_PAGE = "page";
+
     @Autowired
     private WebClient webClient;
 
@@ -44,8 +47,8 @@ public class GitHubClientImpl implements GitHubClient {
     public Flux<GitRepo> getAllRepo(RepoRequest request) {
         Flux<GitRepo> gitRepos = webClient.get()
                 .uri(uriBuilder -> uriBuilder.path(reposUrlPath)
-                        .queryParam(AppConstants.GITHUB_API_PAGE, request.getPage())
-                        .queryParam(AppConstants.GITHUB_API_PER_PAGE, request.getSize())
+                        .queryParam(GITHUB_API_PAGE, request.getPage())
+                        .queryParam(GITHUB_API_PER_PAGE, request.getSize())
                         .build(request.getUsername()))
                 .retrieve()
                 .onStatus(HttpStatus::isError, clientResponse -> handleErrors(clientResponse))

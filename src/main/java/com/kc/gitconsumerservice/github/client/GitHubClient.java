@@ -6,7 +6,6 @@ import com.kc.gitconsumerservice.github.dto.GitRepo;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
-@Service
 public interface GitHubClient {
 
     Flux<GitRepo> getAllRepo(RepoRequest request);

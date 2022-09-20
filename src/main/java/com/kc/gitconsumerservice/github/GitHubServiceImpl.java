@@ -6,6 +6,7 @@ import com.kc.gitconsumerservice.consumer.dto.Repository;
 import com.kc.gitconsumerservice.consumer.services.GitHubService;
 import com.kc.gitconsumerservice.github.client.GitHubClient;
 import com.kc.gitconsumerservice.github.dto.GitRepo;
+import com.kc.gitconsumerservice.github.mapper.GitSchemaMapper;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import lombok.extern.log4j.Log4j2;
 import org.reactivestreams.Publisher;
@@ -27,6 +28,9 @@ public class GitHubServiceImpl implements GitHubService {
     @Autowired
     private GitHubClient gitHubClient;
 
+    @Autowired
+    private GitSchemaMapper mapper;
+
     @RateLimiter(name = "gitRepoService")
     @Cacheable(value="git-repos")
     @Override
@@ -41,8 +45,7 @@ public class GitHubServiceImpl implements GitHubService {
     private Function<GitRepo, Publisher<? extends Repository>> getBranchesByRepo(String userName) {
           return repo -> Mono.zip(
                   Mono.just(repo), gitHubClient.getRepoBranches(userName,repo.getName())
-                          .map(gitBranch -> new Branch(gitBranch.getName(),
-                                  gitBranch.getCommit().getSha())).collectList()
+                          .map(mapper::mapGitBranch).collectList()
           ).map(mapRepository());
     }
 
@@ -50,11 +53,7 @@ public class GitHubServiceImpl implements GitHubService {
         return tuple -> {
             GitRepo gitRepo = tuple.getT1();
             List<Branch> branches = tuple.getT2();
-            return Repository.builder()
-                    .name(gitRepo.getName())
-                    .ownerLogin(gitRepo.getOwner().getLogin())
-                    .branches(branches)
-                    .build();
+            return mapper.mapGitRepo(gitRepo, branches);
         };
     }
 }
