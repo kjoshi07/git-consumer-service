@@ -4,6 +4,7 @@ import com.kc.gitconsumerservice.configuration.ResourceWebPropertiesConfig;
 import com.kc.gitconsumerservice.configuration.SecurityConfig;
 import com.kc.gitconsumerservice.consumer.controller.GitHubConsumerController;
 import com.kc.gitconsumerservice.consumer.dto.Branch;
+import com.kc.gitconsumerservice.consumer.dto.ErrorResponse;
 import com.kc.gitconsumerservice.consumer.dto.Repository;
 import com.kc.gitconsumerservice.consumer.services.GitHubService;
 import com.kc.gitconsumerservice.exceptions.BadRequestException;
@@ -13,6 +14,7 @@ import com.kc.gitconsumerservice.exceptions.UserNotFoundException;
 import com.kc.gitconsumerservice.github.GitHubServiceImpl;
 import com.kc.gitconsumerservice.utils.TestDataConstants;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -34,7 +36,9 @@ import reactor.core.publisher.Flux;
 
 import java.util.List;
 
+import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @TestPropertySource(locations = "/test.properties")
 @ExtendWith(SpringExtension.class)
@@ -64,7 +68,7 @@ public class GitHubConsumerControllerTest {
 
     @BeforeEach
     void setBasicAuth() {
-        basicAuthHeader =  "basic " + Base64Utils.encodeToString((testUser + ":" + testPassword).getBytes());
+        basicAuthHeader = "basic " + Base64Utils.encodeToString((testUser + ":" + testPassword).getBytes());
     }
 
     private Repository mockGitRepository() {
@@ -78,8 +82,9 @@ public class GitHubConsumerControllerTest {
 
     @Test
     void testGetAllUserRepos_Success_200() throws Exception {
-        Mockito.when(gitHubService.getNonForkedRepos(any())).thenReturn(Flux.just(mockGitRepository()));
-        webTestClient
+        Repository expected = mockGitRepository();
+        Mockito.when(gitHubService.getNonForkedRepos(any())).thenReturn(Flux.just(expected));
+        List<Repository> result = webTestClient
                 .get()
                 .uri(gitHubUserApiPath)
                 .headers(headers -> {
@@ -88,13 +93,19 @@ public class GitHubConsumerControllerTest {
                 })
                 .exchange()
                 .expectStatus().isOk()
-                .expectBodyList(Repository.class);
+                .expectBodyList(Repository.class)
+                .returnResult()
+                .getResponseBody();
+        assertThat(result).size().isEqualTo(1);
+        Repository repo = result.get(0);
+        assertThat(repo).usingRecursiveComparison().isEqualTo(expected);
     }
 
     @Test
     void testGetAllUserRepos_Pagination_Success_200() throws Exception {
-        Mockito.when(gitHubService.getNonForkedRepos(any())).thenReturn(Flux.just(mockGitRepository()));
-        webTestClient
+        Repository expected = mockGitRepository();
+        Mockito.when(gitHubService.getNonForkedRepos(any())).thenReturn(Flux.just(expected));
+        List<Repository> result = webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path(gitHubUserApiPath)
@@ -107,13 +118,19 @@ public class GitHubConsumerControllerTest {
                 })
                 .exchange()
                 .expectStatus().isOk()
-                .expectBodyList(Repository.class);
+                .expectBodyList(Repository.class)
+                .returnResult()
+                .getResponseBody();
+        assertThat(result).size().isEqualTo(1);
+        Repository repo = result.get(0);
+        assertThat(repo).usingRecursiveComparison().isEqualTo(expected);
     }
 
 
     @Test
     void testGetAllUserRepos_ContentTypeXml_Failed_406() {
-        Mockito.when(gitHubService.getNonForkedRepos(any())).thenThrow(new UnsupportedMediaTypeException("Content-Type not supported"));
+        String errorMessage = "406 NOT_ACCEPTABLE \"Could not find acceptable representation\"";
+        Mockito.when(gitHubService.getNonForkedRepos(any())).thenThrow(new UnsupportedMediaTypeException(errorMessage));
         webTestClient.get()
                 .uri(gitHubUserApiPath)
                 .headers(headers -> {
@@ -123,13 +140,15 @@ public class GitHubConsumerControllerTest {
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.NOT_ACCEPTABLE)
                 .expectBody()
-                .jsonPath("$.status").isEqualTo(HttpStatus.NOT_ACCEPTABLE.value());
+                .jsonPath("$.status").isEqualTo(HttpStatus.NOT_ACCEPTABLE.value())
+                .jsonPath("$.message").isEqualTo(errorMessage);
     }
 
 
     @Test
     void testGetAllUserRepos_UserNotFound_Failed_404() throws Exception {
-        Mockito.when(gitHubService.getNonForkedRepos(any())).thenThrow(new UserNotFoundException("User is not found in github!"));
+        String errorMessage = "User is not found in github!";
+        Mockito.when(gitHubService.getNonForkedRepos(any())).thenThrow(new UserNotFoundException(errorMessage));
         webTestClient.get()
                 .uri(githubNonUserApiPath)
                 .headers(headers -> {
@@ -139,12 +158,14 @@ public class GitHubConsumerControllerTest {
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.NOT_FOUND)
                 .expectBody()
-                .jsonPath("$.status").isEqualTo(HttpStatus.NOT_FOUND.value());
+                .jsonPath("$.status").isEqualTo(HttpStatus.NOT_FOUND.value())
+                .jsonPath("$.message").isEqualTo(errorMessage);
     }
 
     @Test
     public void testGetAllUserRepos_TooManyRequest_Failed_403() throws Exception {
-        Mockito.when(gitHubService.getNonForkedRepos(any())).thenThrow(new RateLimitException("rate limit is exceeded to github!"));
+        String errorMessage = "rate limit is exceeded to github!";
+        Mockito.when(gitHubService.getNonForkedRepos(any())).thenThrow(new RateLimitException(errorMessage));
         webTestClient.get()
                 .uri(gitHubUserApiPath)
                 .headers(headers -> {
@@ -154,12 +175,14 @@ public class GitHubConsumerControllerTest {
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.FORBIDDEN)
                 .expectBody()
-                .jsonPath("$.status").isEqualTo(HttpStatus.FORBIDDEN.value());
+                .jsonPath("$.status").isEqualTo(HttpStatus.FORBIDDEN.value())
+                .jsonPath("$.message").isEqualTo(errorMessage);
     }
 
     @Test
     public void testGetAllUserRepos_BadRequest_Failed_400() throws Exception {
-        Mockito.when(gitHubService.getNonForkedRepos(any())).thenThrow(new BadRequestException("Bad Request!"));
+        String errorMessage = "Bad Request!";
+        Mockito.when(gitHubService.getNonForkedRepos(any())).thenThrow(new BadRequestException(errorMessage));
         webTestClient.get()
                 .uri(gitHubUserApiPath)
                 .headers(headers -> {
@@ -169,12 +192,14 @@ public class GitHubConsumerControllerTest {
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.BAD_REQUEST)
                 .expectBody()
-                .jsonPath("$.status").isEqualTo(HttpStatus.BAD_REQUEST.value());
+                .jsonPath("$.status").isEqualTo(HttpStatus.BAD_REQUEST.value())
+                .jsonPath("$.message").isEqualTo(errorMessage);
     }
 
     @Test
     public void testGetAllUserRepos_UnHandled_Failed_500() throws Exception {
-        Mockito.when(gitHubService.getNonForkedRepos(any())).thenThrow(new UnHandledException("UnHandled Error."));
+        String errorMessage = "UnHandled Error.";
+        Mockito.when(gitHubService.getNonForkedRepos(any())).thenThrow(new UnHandledException(errorMessage));
         webTestClient.get()
                 .uri(gitHubUserApiPath)
                 .headers(headers -> {
@@ -184,6 +209,7 @@ public class GitHubConsumerControllerTest {
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
                 .expectBody()
-                .jsonPath("$.status").isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value());
+                .jsonPath("$.status").isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .jsonPath("$.message").isEqualTo(errorMessage);
     }
 }

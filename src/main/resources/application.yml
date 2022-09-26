@@ -29,7 +29,7 @@ api:
     repo-path: ${api.endpoint.base}/git-repo
   git-hub:
     url: https://api.github.com
-    auth-token: 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
+    auth-token: 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
     path:
       repos: /users/{username}/repos
       branches: /repos/{username}/{repoName}/branches
