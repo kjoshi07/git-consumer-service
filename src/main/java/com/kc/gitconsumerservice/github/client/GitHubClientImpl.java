@@ -31,17 +31,20 @@ public class GitHubClientImpl implements GitHubClient {
     private final static String GITHUB_API_PER_PAGE = "per_page";
     private static final String GITHUB_API_PAGE = "page";
 
-    @Autowired
-    private WebClient webClient;
+    private final WebClient webClient;
 
-    @Autowired
-    private MessageSource messageSource;
+    private final MessageSource messageSource;
 
     @Value("${api.git-hub.path.repos}")
     private String reposUrlPath;
 
     @Value("${api.git-hub.path.branches}")
     private String branchesUrlPath;
+
+    public GitHubClientImpl(WebClient webClient, MessageSource messageSource) {
+        this.webClient = webClient;
+        this.messageSource = messageSource;
+    }
 
     @Override
     public Flux<GitRepo> getAllRepo(RepoRequest request) {

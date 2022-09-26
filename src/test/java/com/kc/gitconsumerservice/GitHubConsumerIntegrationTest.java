@@ -69,31 +69,6 @@ public class GitHubConsumerIntegrationTest {
                 .build();
     }
 
-
-    @Disabled
-    @Test
-    void whenNoCredentials_UnAuthorize_401() {
-        webTestClient.get()
-                .uri(gitHubUserApiPath)
-                .exchange()
-                .expectStatus().isUnauthorized();
-    }
-
-    private void mockService(int statusCode, String responseData) {
-        mockServerClient
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath(gitHubUserApiPath)
-                )
-                .respond(
-                        response()
-                                .withStatusCode(statusCode)
-                                .withContentType(org.mockserver.model.MediaType.APPLICATION_JSON)
-                                .withBody(responseData)
-                );
-    }
-
     @Test
     void testGetAllUserRepos_Success_200() throws Exception {
         List<Repository> expected = List.of(createTestRepository1(), createTestRepository2());
@@ -162,6 +137,21 @@ public class GitHubConsumerIntegrationTest {
                 .expectBody()
                 .jsonPath("$.status").isEqualTo(HttpStatus.NOT_ACCEPTABLE.value())
                 .jsonPath("$.message").isEqualTo(errorMessage);
+    }
+
+    private void mockService(int statusCode, String responseData) {
+        mockServerClient
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath(gitHubUserApiPath)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(statusCode)
+                                .withContentType(org.mockserver.model.MediaType.APPLICATION_JSON)
+                                .withBody(responseData)
+                );
     }
 
 }

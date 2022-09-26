@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -26,13 +25,16 @@ import java.text.MessageFormat;
 @Log4j2
 public class GitHubConsumerController {
 
-    @Autowired
-    private GitHubService gitHubService;
+    private final GitHubService gitHubService;
+
+    public GitHubConsumerController(GitHubService gitHubService) {
+        this.gitHubService = gitHubService;
+    }
 
     @Operation(
             summary = "Get All Non-Forked Repository for a User",
-            parameters = {@Parameter(name = "page", in = ParameterIn.QUERY, required = false, description = "Page Number"),
-                    @Parameter(name = "size", in = ParameterIn.QUERY, required = false, description = "Total Records")}
+            parameters = {@Parameter(name = "page", in = ParameterIn.QUERY, description = "Page Number"),
+                    @Parameter(name = "size", in = ParameterIn.QUERY, description = "Total Records")}
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",

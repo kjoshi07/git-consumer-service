@@ -10,7 +10,6 @@ import com.kc.gitconsumerservice.github.mapper.GitSchemaMapper;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import lombok.extern.log4j.Log4j2;
 import org.reactivestreams.Publisher;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -25,11 +24,14 @@ import java.util.function.Function;
 @Service
 public class GitHubServiceImpl implements GitHubService {
 
-    @Autowired
-    private GitHubClient gitHubClient;
+    private final GitHubClient gitHubClient;
 
-    @Autowired
-    private GitSchemaMapper mapper;
+    private final GitSchemaMapper mapper;
+
+    public GitHubServiceImpl(GitHubClient gitHubClient, GitSchemaMapper gitSchemaMapper) {
+        this.gitHubClient = gitHubClient;
+        this.mapper = gitSchemaMapper;
+    }
 
     @RateLimiter(name = "gitRepoService")
     @Cacheable(value="git-repos")
