@@ -18,7 +18,7 @@ public class AppCacheConfig {
     @Value("${api.cache.duration}")
     private int cacheDuration;
 
- @Bean
+    @Bean
     public Caffeine caffeineConfig() {
         return Caffeine.newBuilder().expireAfterWrite(cacheDuration, TimeUnit.MINUTES);
     }

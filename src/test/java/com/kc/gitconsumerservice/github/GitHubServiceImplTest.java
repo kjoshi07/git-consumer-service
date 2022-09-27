@@ -62,7 +62,9 @@ public class GitHubServiceImplTest {
         StepVerifier.create(result)
                 .expectNextMatches(repository ->
                         repository.getName().equals(TestDataConstants.REPO_2) &&
-                                repository.getOwnerLogin().equals(OWNER_2) && repository.getBranches().get(0).getName().equals(BRANCH_2)
+                                repository.getOwnerLogin().equals(OWNER_2)
+                                && repository.getBranches().get(0).getName().equals(BRANCH_2)
+                                && repository.getBranches().get(0).getSha().equals(SHA_2)
                 )
                 .expectComplete()
                 .verify();
